@@ -1,0 +1,6 @@
+[build]
+  publish = "dist/"
+  command = "yarn parcel build src/index.html --public-url '.'"
+
+[build.environment]
+  ELM_HOME = "$NETLIFY_BUILD_BASE/cache/elm"
