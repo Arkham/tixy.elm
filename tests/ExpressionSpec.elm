@@ -33,6 +33,9 @@ spec =
             , test "division" <|
                 \_ ->
                     parseEquals "10 / 2" (Div (Num 10) (Num 2))
+            , test "mod" <|
+                \_ ->
+                    parseEquals "10 % 2" (Mod (Num 10) (Num 2))
             , test "exponents" <|
                 \_ ->
                     parseEquals "10 ^ 2" (Exp (Num 10) (Num 2))

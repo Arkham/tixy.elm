@@ -12,6 +12,7 @@ type Expression
     | Sub Expression Expression
     | Mul Expression Expression
     | Div Expression Expression
+    | Mod Expression Expression
     | Exp Expression Expression
     | Sin Expression
     | Cos Expression
@@ -140,6 +141,7 @@ type Operator
     | SubOp
     | MulOp
     | DivOp
+    | ModOp
     | ExpOp
     | BitwiseAndOp
     | BitwiseOrOp
@@ -157,6 +159,7 @@ operator =
         , Parser.succeed SubOp |. symbol "-"
         , Parser.succeed MulOp |. symbol "*"
         , Parser.succeed DivOp |. symbol "/"
+        , Parser.succeed ModOp |. symbol "%"
         , Parser.succeed ExpOp |. symbol "^"
         , Parser.succeed BitwiseAndOp |. symbol "&"
         , Parser.succeed BitwiseOrOp |. symbol "|"
@@ -184,6 +187,9 @@ precedence op =
         DivOp ->
             2
 
+        ModOp ->
+            2
+
         ExpOp ->
             3
 
@@ -209,6 +215,9 @@ opToExpr op =
         DivOp ->
             Div
 
+        ModOp ->
+            Mod
+
         ExpOp ->
             Exp
 
@@ -232,6 +241,9 @@ associativity op =
             LeftAssociative
 
         DivOp ->
+            LeftAssociative
+
+        ModOp ->
             LeftAssociative
 
         ExpOp ->
