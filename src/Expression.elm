@@ -94,6 +94,11 @@ type Operator
     | ExpOp
 
 
+type Associativity
+    = LeftAssociative
+    | RightAssociative
+
+
 operator : Parser Operator
 operator =
     oneOf
@@ -143,6 +148,25 @@ opToExpr op =
             Exp
 
 
+associativity : Operator -> Associativity
+associativity op =
+    case op of
+        AddOp ->
+            LeftAssociative
+
+        SubOp ->
+            LeftAssociative
+
+        MulOp ->
+            LeftAssociative
+
+        DivOp ->
+            LeftAssociative
+
+        ExpOp ->
+            RightAssociative
+
+
 {-| This function is using the shunting yard algorithm.
 
 Imagine we have the expression `1 + 2 * 3`. We'd like to reduce it like this:
@@ -166,20 +190,28 @@ finalize revOps finalExpr =
         [] ->
             finalExpr
 
-        [ ( lastExpr, lastOp ) ] ->
-            let
-                expr =
-                    opToExpr lastOp
-            in
-            expr lastExpr finalExpr
-
-        ( firstExpr, firstOp ) :: (( _, secondOp ) as second) :: otherRevOps ->
+        ( firstExpr, firstOp ) :: otherRevOps ->
             let
                 expr =
                     opToExpr firstOp
+
+                assoc =
+                    associativity firstOp
+
+                anyOtherHasLowerPrecedence =
+                    case associativity firstOp of
+                        LeftAssociative ->
+                            List.any
+                                (\( _, op ) -> precedence firstOp > precedence op)
+                                otherRevOps
+
+                        RightAssociative ->
+                            List.any
+                                (\( _, op ) -> precedence firstOp >= precedence op)
+                                otherRevOps
             in
-            if precedence firstOp > precedence secondOp then
-                finalize (second :: otherRevOps) (expr firstExpr finalExpr)
+            if anyOtherHasLowerPrecedence then
+                finalize otherRevOps (expr firstExpr finalExpr)
 
             else
-                expr (finalize (second :: otherRevOps) firstExpr) finalExpr
+                expr (finalize otherRevOps firstExpr) finalExpr
