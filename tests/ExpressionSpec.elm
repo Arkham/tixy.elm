@@ -36,6 +36,12 @@ spec =
             , test "exponents" <|
                 \_ ->
                     parseEquals "10 ^ 2" (Exp (Num 10) (Num 2))
+            , test "bitwise AND" <|
+                \_ ->
+                    parseEquals "10 & 2" (BitwiseAnd (Num 10) (Num 2))
+            , test "bitwise Or" <|
+                \_ ->
+                    parseEquals "10 | 2" (BitwiseOr (Num 10) (Num 2))
             , test "parenthesis" <|
                 \_ ->
                     parseEquals "(1 + 2) * 3"
@@ -213,6 +219,24 @@ spec =
                                     (Add
                                         (Exp (Sub (Var X) (Num 7.5)) (Num 2))
                                         (Exp (Sub (Var Y) (Num 6)) (Num 2))
+                                    )
+                                )
+                            )
+                        )
+            , test "another complex example" <|
+                \_ ->
+                    parseEquals
+                        "sin (2 * atan((y-7.5) / (x-7.5)) + 5 * t)"
+                        (Sin
+                            (Mul
+                                (Num 2)
+                                (Atan
+                                    (Add
+                                        (Div
+                                            (Sub (Var Y) (Num 7.5))
+                                            (Sub (Var X) (Num 7.5))
+                                        )
+                                        (Mul (Num 5) (Var T))
                                     )
                                 )
                             )

@@ -6,6 +6,8 @@ import Parser exposing (..)
 type Expression
     = Num Float
     | Var Variable
+    | BitwiseAnd Expression Expression
+    | BitwiseOr Expression Expression
     | Add Expression Expression
     | Sub Expression Expression
     | Mul Expression Expression
@@ -139,6 +141,8 @@ type Operator
     | MulOp
     | DivOp
     | ExpOp
+    | BitwiseAndOp
+    | BitwiseOrOp
 
 
 type Associativity
@@ -149,36 +153,50 @@ type Associativity
 operator : Parser Operator
 operator =
     oneOf
-        [ map (\_ -> AddOp) (symbol "+")
-        , map (\_ -> SubOp) (symbol "-")
-        , map (\_ -> MulOp) (symbol "*")
-        , map (\_ -> DivOp) (symbol "/")
-        , map (\_ -> ExpOp) (symbol "^")
+        [ Parser.succeed AddOp |. symbol "+"
+        , Parser.succeed SubOp |. symbol "-"
+        , Parser.succeed MulOp |. symbol "*"
+        , Parser.succeed DivOp |. symbol "/"
+        , Parser.succeed ExpOp |. symbol "^"
+        , Parser.succeed BitwiseAndOp |. symbol "&"
+        , Parser.succeed BitwiseOrOp |. symbol "|"
         ]
 
 
 precedence : Operator -> Int
 precedence op =
     case op of
-        AddOp ->
+        BitwiseAndOp ->
             0
+
+        BitwiseOrOp ->
+            0
+
+        AddOp ->
+            1
 
         SubOp ->
-            0
+            1
 
         MulOp ->
-            1
+            2
 
         DivOp ->
-            1
+            2
 
         ExpOp ->
-            2
+            3
 
 
 opToExpr : Operator -> (Expression -> Expression -> Expression)
 opToExpr op =
     case op of
+        BitwiseAndOp ->
+            BitwiseAnd
+
+        BitwiseOrOp ->
+            BitwiseOr
+
         AddOp ->
             Add
 
@@ -198,6 +216,12 @@ opToExpr op =
 associativity : Operator -> Associativity
 associativity op =
     case op of
+        BitwiseAndOp ->
+            LeftAssociative
+
+        BitwiseOrOp ->
+            LeftAssociative
+
         AddOp ->
             LeftAssociative
 
