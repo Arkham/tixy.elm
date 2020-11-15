@@ -1,15 +1,31 @@
-module Expression exposing (Expression(..), parser)
+module Expression exposing (Expression(..), Variable(..), parser)
 
 import Parser exposing (..)
 
 
 type Expression
     = Num Float
+    | Var Variable
     | Add Expression Expression
     | Sub Expression Expression
     | Mul Expression Expression
     | Div Expression Expression
     | Exp Expression Expression
+    | Sin Expression
+    | Cos Expression
+    | Tan Expression
+    | Asin Expression
+    | Acos Expression
+    | Atan Expression
+    | Abs Expression
+    | Sqrt Expression
+
+
+type Variable
+    = T
+    | I
+    | X
+    | Y
 
 
 parser : Parser Expression
@@ -38,6 +54,31 @@ digits =
             ]
 
 
+variable : Parser Expression
+variable =
+    Parser.succeed Var
+        |= oneOf
+            [ Parser.succeed T |. keyword "t"
+            , Parser.succeed I |. keyword "i"
+            , Parser.succeed X |. keyword "x"
+            , Parser.succeed Y |. keyword "y"
+            ]
+
+
+mathFunctions : Parser (Expression -> Expression)
+mathFunctions =
+    oneOf
+        [ Parser.succeed Sin |. keyword "sin"
+        , Parser.succeed Cos |. keyword "cos"
+        , Parser.succeed Tan |. keyword "tan"
+        , Parser.succeed Asin |. keyword "asin"
+        , Parser.succeed Acos |. keyword "acos"
+        , Parser.succeed Atan |. keyword "atan"
+        , Parser.succeed Abs |. keyword "abs"
+        , Parser.succeed Sqrt |. keyword "sqrt"
+        ]
+
+
 {-| A term is a standalone chunk of math, like `4` or `(3 + 4)`. We use it as
 a building block in larger expressions.
 -}
@@ -45,12 +86,18 @@ term : Parser Expression
 term =
     oneOf
         [ digits
+        , variable
         , succeed identity
             |. symbol "("
             |. spaces
             |= lazy (\_ -> expression)
             |. spaces
             |. symbol ")"
+        , succeed (\fn value -> fn value)
+            |. spaces
+            |= mathFunctions
+            |. spaces
+            |= lazy (\_ -> expression)
         ]
 
 

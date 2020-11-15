@@ -1,7 +1,7 @@
 module ExpressionSpec exposing (spec)
 
 import Expect
-import Expression exposing (Expression(..))
+import Expression exposing (Expression(..), Variable(..))
 import Parser
 import Test exposing (..)
 
@@ -159,6 +159,60 @@ spec =
                                     (Exp
                                         (Sub (Num 1) (Num 5))
                                         (Exp (Num 2) (Num 3))
+                                    )
+                                )
+                            )
+                        )
+            ]
+        , describe "variables"
+            [ test "parses t, i, x, y" <|
+                \_ ->
+                    parseEquals
+                        "1 + t - i * x / y"
+                        (Sub
+                            (Add (Num 1) (Var T))
+                            (Mul
+                                (Var I)
+                                (Div (Var X) (Var Y))
+                            )
+                        )
+            ]
+        , describe "math functions"
+            [ test "parses sin" <|
+                \_ ->
+                    parseEquals "sin 30" (Sin (Num 30))
+            , test "parses cos" <|
+                \_ ->
+                    parseEquals "cos 30" (Cos (Num 30))
+            , test "parses tan" <|
+                \_ ->
+                    parseEquals "tan 30" (Tan (Num 30))
+            , test "parses asin" <|
+                \_ ->
+                    parseEquals "asin 30" (Asin (Num 30))
+            , test "parses acos" <|
+                \_ ->
+                    parseEquals "acos 30" (Acos (Num 30))
+            , test "parses atan" <|
+                \_ ->
+                    parseEquals "atan 30" (Atan (Num 30))
+            , test "parses abs" <|
+                \_ ->
+                    parseEquals "abs 30" (Abs (Num 30))
+            , test "parses sqrt" <|
+                \_ ->
+                    parseEquals "sqrt 30" (Sqrt (Num 30))
+            , test "more complex example" <|
+                \_ ->
+                    parseEquals
+                        "sin (t - sqrt ((x - 7.5) ^ 2 + (y - 6) ^ 2))"
+                        (Sin
+                            (Sub
+                                (Var T)
+                                (Sqrt
+                                    (Add
+                                        (Exp (Sub (Var X) (Num 7.5)) (Num 2))
+                                        (Exp (Sub (Var Y) (Num 6)) (Num 2))
                                     )
                                 )
                             )
