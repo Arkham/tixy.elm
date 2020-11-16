@@ -4,13 +4,17 @@ body {
   background-color: #111;
 }
 
+.container {
+  width: 320px;
+  margin: 0 auto;
+}
+
 h1 {
   margin-top: 20px;
   text-align: center;
 }
 
 .map {
-  margin: 0 auto;
   background: #111;
   display: grid;
   width: 320px;
@@ -30,4 +34,22 @@ h1 {
   margin: 1px 1px 0 0;
   transform-origin: center center;
   transform: scale(1);
+}
+
+.editor {
+  margin-top: 20px;
+}
+
+input {
+  width: 100%;
+  background: #111;
+  font-family: monospace;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+input:focus {
+  outline: 0;
 }
