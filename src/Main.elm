@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Browser
+import Browser.Dom as Dom
 import Browser.Events as Events
 import Expression exposing (Expression)
 import Html exposing (Html, button, div, text)
@@ -8,6 +9,7 @@ import Html.Attributes as Attr exposing (attribute, class)
 import Html.Events
 import List.Zipper as Zipper exposing (Zipper)
 import Parser
+import Task
 import Time
 import Tutorial exposing (Tutorial)
 
@@ -52,6 +54,8 @@ type Msg
     = Tick Float
     | ChangeInput String
     | NextTutorial
+    | FocusInput
+    | InputFocused
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -107,6 +111,12 @@ update msg model =
               }
             , Cmd.none
             )
+
+        FocusInput ->
+            ( model, Task.attempt (\_ -> InputFocused) (Dom.focus inputId) )
+
+        InputFocused ->
+            ( { model | help = "hit ENTER to save the url\nand share it" }, Cmd.none )
 
 
 main : Program () Model Msg
@@ -166,6 +176,11 @@ viewField exp t i =
     div [ class "field", attribute "style" (styleFromValue (callTixyFn exp t i)) ] []
 
 
+inputId : String
+inputId =
+    "tixy-input"
+
+
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
@@ -177,6 +192,7 @@ view model =
             , Html.span [] [ text "(t,i,x,y) =>" ]
             , Html.input
                 [ Attr.value model.input
+                , Attr.id inputId
                 , Html.Events.onInput ChangeInput
                 , Attr.attribute "autocomplete" "off"
                 , Attr.attribute "autocapitalize" "off"
@@ -188,9 +204,9 @@ view model =
         ]
 
 
-viewHelp : String -> Html msg
+viewHelp : String -> Html Msg
 viewHelp str =
-    div [ class "help" ]
+    div [ class "help", Html.Events.onClick FocusInput ]
         (str
             |> String.split "\n"
             |> List.map
