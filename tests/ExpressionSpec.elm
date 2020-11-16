@@ -9,6 +9,14 @@ import Test exposing (..)
 spec : Test
 spec =
     describe "Expression"
+        [ parserSpec
+        , evaluateSpec
+        ]
+
+
+parserSpec : Test
+parserSpec =
+    describe "parser"
         [ describe "digits"
             [ test "parses integers" <|
                 \_ ->
@@ -246,6 +254,114 @@ spec =
                         )
             ]
         ]
+
+
+evaluateSpec : Test
+evaluateSpec =
+    let
+        tixy =
+            { t = 2
+            , i = 3
+            , x = 4
+            , y = 5
+            }
+    in
+    describe "evaluate"
+        [ test "simple number" <|
+            \_ ->
+                Expression.evaluate tixy (Num 10)
+                    |> Expect.equal 10
+        , test "simple variable" <|
+            \_ ->
+                Expression.evaluate tixy (Var T)
+                    |> Expect.equal 2
+        , describe "simple math"
+            [ test "addition" <|
+                \_ ->
+                    Expression.evaluate tixy (Add (Num 1) (Num 3))
+                        |> Expect.equal 4
+            , test "subtraction" <|
+                \_ ->
+                    Expression.evaluate tixy (Sub (Num 1) (Num 3))
+                        |> Expect.equal -2
+            , test "multiplication" <|
+                \_ ->
+                    Expression.evaluate tixy (Mul (Num 1) (Num 3))
+                        |> Expect.equal 3
+            , test "division" <|
+                \_ ->
+                    Expression.evaluate tixy (Div (Num 4) (Num 2))
+                        |> Expect.equal 2
+            , test "modulo" <|
+                \_ ->
+                    Expression.evaluate tixy (Mod (Num 4) (Num 3))
+                        |> Expect.equal 1
+            , test "negative modulo" <|
+                \_ ->
+                    Expression.evaluate tixy (Mod (Num -4) (Num 3))
+                        |> Expect.equal -1
+            , test "exponents" <|
+                \_ ->
+                    Expression.evaluate tixy (Exp (Num 2) (Num 8))
+                        |> Expect.equal 256
+            , test "using variables" <|
+                \_ ->
+                    Expression.evaluate tixy (Add (Var T) (Mul (Var I) (Var X)))
+                        |> Expect.equal 14
+            ]
+        , describe "bitwise operators"
+            [ test "bitwise AND" <|
+                \_ ->
+                    Expression.evaluate tixy (BitwiseAnd (Num 2) (Num 3))
+                        |> Expect.equal 2
+            , test "bitwise OR" <|
+                \_ ->
+                    Expression.evaluate tixy (BitwiseOr (Num 3) (Num 5))
+                        |> Expect.equal 7
+            ]
+        , let
+            expectEqual v =
+                Expect.within (Expect.Absolute 0.0001) v
+          in
+          describe "math functions"
+            [ test "sin" <|
+                \_ ->
+                    Expression.evaluate tixy (Sin (Num (degrees 30)))
+                        |> expectEqual 0.5
+            , test "cos" <|
+                \_ ->
+                    Expression.evaluate tixy (Cos (Num (degrees 60)))
+                        |> expectEqual 0.5
+            , test "tan" <|
+                \_ ->
+                    Expression.evaluate tixy (Tan (Num (degrees 45)))
+                        |> expectEqual 1
+            , test "asin" <|
+                \_ ->
+                    Expression.evaluate tixy (Asin (Num 0.5))
+                        |> expectEqual (degrees 30)
+            , test "acos" <|
+                \_ ->
+                    Expression.evaluate tixy (Acos (Num 0.5))
+                        |> expectEqual (degrees 60)
+            , test "atan" <|
+                \_ ->
+                    Expression.evaluate tixy (Atan (Num 1))
+                        |> expectEqual (degrees 45)
+            , test "abs" <|
+                \_ ->
+                    Expression.evaluate tixy (Abs (Num -1))
+                        |> expectEqual 1
+            , test "sqrt" <|
+                \_ ->
+                    Expression.evaluate tixy (Sqrt (Num 4))
+                        |> expectEqual 2
+            ]
+        ]
+
+
+
+-- HELPERS
 
 
 parseEquals : String -> Expression -> Expect.Expectation

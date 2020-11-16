@@ -1,5 +1,6 @@
-module Expression exposing (Expression(..), Variable(..), parser)
+module Expression exposing (Expression(..), Variable(..), evaluate, parser)
 
+import Bitwise
 import Parser exposing (..)
 
 
@@ -298,3 +299,76 @@ finalize revOps finalExpr =
 
             else
                 expr (finalize otherRevOps firstExpr) finalExpr
+
+
+evaluate : { t : Float, i : Float, x : Float, y : Float } -> Expression -> Float
+evaluate ({ t, i, x, y } as tixy) expr =
+    case expr of
+        Num num ->
+            num
+
+        Var T ->
+            t
+
+        Var I ->
+            i
+
+        Var X ->
+            x
+
+        Var Y ->
+            y
+
+        BitwiseAnd first second ->
+            toFloat <|
+                Bitwise.and (round <| evaluate tixy second)
+                    (round <| evaluate tixy first)
+
+        BitwiseOr first second ->
+            toFloat <|
+                Bitwise.or (round <| evaluate tixy second)
+                    (round <| evaluate tixy first)
+
+        Add first second ->
+            evaluate tixy first + evaluate tixy second
+
+        Sub first second ->
+            evaluate tixy first - evaluate tixy second
+
+        Mul first second ->
+            evaluate tixy first * evaluate tixy second
+
+        Div first second ->
+            evaluate tixy first / evaluate tixy second
+
+        Mod first second ->
+            toFloat <|
+                remainderBy (round <| evaluate tixy second)
+                    (round <| evaluate tixy first)
+
+        Exp first second ->
+            evaluate tixy first ^ evaluate tixy second
+
+        Sin value ->
+            sin (evaluate tixy value)
+
+        Cos value ->
+            cos (evaluate tixy value)
+
+        Tan value ->
+            tan (evaluate tixy value)
+
+        Asin value ->
+            asin (evaluate tixy value)
+
+        Acos value ->
+            acos (evaluate tixy value)
+
+        Atan value ->
+            atan (evaluate tixy value)
+
+        Abs value ->
+            abs (evaluate tixy value)
+
+        Sqrt value ->
+            sqrt (evaluate tixy value)
