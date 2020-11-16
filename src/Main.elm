@@ -55,7 +55,24 @@ update msg model =
             ( { model | time = model.time + dt }, Cmd.none )
 
         ChangeInput str ->
-            ( { model | input = str, expression = parse str }, Cmd.none )
+            let
+                newExpression =
+                    case ( String.trim str, parse str ) of
+                        ( "", _ ) ->
+                            Nothing
+
+                        ( _, Just v ) ->
+                            Just v
+
+                        ( _, Nothing ) ->
+                            model.expression
+            in
+            ( { model
+                | input = str
+                , expression = newExpression
+              }
+            , Cmd.none
+            )
 
 
 main : Program () Model Msg
