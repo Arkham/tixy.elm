@@ -36,10 +36,6 @@ parse str =
             Just value
 
         Err err ->
-            let
-                _ =
-                    Debug.log "err" err
-            in
             Nothing
 
 
