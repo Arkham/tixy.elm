@@ -40,6 +40,10 @@ h1 {
   margin-top: 20px;
 }
 
+.help {
+  color: #f24;
+}
+
 input {
   width: 100%;
   background: #111;

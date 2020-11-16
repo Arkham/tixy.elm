@@ -231,32 +231,32 @@ parserSpec =
         , describe "math functions"
             [ test "parses sin" <|
                 \_ ->
-                    parseEquals "sin 30" (Sin (Num 30))
+                    parseEquals "sin(30)" (Sin (Num 30))
             , test "parses cos" <|
                 \_ ->
-                    parseEquals "cos 30" (Cos (Num 30))
+                    parseEquals "cos(30)" (Cos (Num 30))
             , test "parses tan" <|
                 \_ ->
-                    parseEquals "tan 30" (Tan (Num 30))
+                    parseEquals "tan(30)" (Tan (Num 30))
             , test "parses asin" <|
                 \_ ->
-                    parseEquals "asin 30" (Asin (Num 30))
+                    parseEquals "asin(30)" (Asin (Num 30))
             , test "parses acos" <|
                 \_ ->
-                    parseEquals "acos 30" (Acos (Num 30))
+                    parseEquals "acos(30)" (Acos (Num 30))
             , test "parses atan" <|
                 \_ ->
-                    parseEquals "atan 30" (Atan (Num 30))
+                    parseEquals "atan(30)" (Atan (Num 30))
             , test "parses abs" <|
                 \_ ->
-                    parseEquals "abs 30" (Abs (Num 30))
+                    parseEquals "abs(30)" (Abs (Num 30))
             , test "parses sqrt" <|
                 \_ ->
-                    parseEquals "sqrt 30" (Sqrt (Num 30))
+                    parseEquals "sqrt(30)" (Sqrt (Num 30))
             , test "more complex example" <|
                 \_ ->
                     parseEquals
-                        "sin (t - sqrt ((x - 7.5) ^ 2 + (y - 6) ^ 2))"
+                        "sin(t - sqrt((x - 7.5) ^ 2 + (y - 6) ^ 2))"
                         (Sin
                             (Sub
                                 (Var T)
@@ -271,19 +271,19 @@ parserSpec =
             , test "another complex example" <|
                 \_ ->
                     parseEquals
-                        "sin (2 * atan((y-7.5) / (x-7.5)) + 5 * t)"
+                        "sin(2 * atan((y-7.5) / (x-7.5)) + 5 * t)"
                         (Sin
-                            (Mul
-                                (Num 2)
-                                (Atan
-                                    (Add
+                            (Add
+                                (Mul
+                                    (Num 2)
+                                    (Atan
                                         (Div
                                             (Sub (Var Y) (Num 7.5))
                                             (Sub (Var X) (Num 7.5))
                                         )
-                                        (Mul (Num 5) (Var T))
                                     )
                                 )
+                                (Mul (Num 5) (Var T))
                             )
                         )
             , test "parses negative functions" <|

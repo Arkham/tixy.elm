@@ -120,10 +120,12 @@ term =
                 |. symbol ")"
         , negatable <|
             succeed (\fn value -> fn value)
-                |. spaces
                 |= mathFunctions
+                |. symbol "("
                 |. spaces
                 |= lazy (\_ -> expression)
+                |. spaces
+                |. symbol ")"
         ]
 
 
