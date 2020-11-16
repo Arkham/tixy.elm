@@ -60,6 +60,13 @@ parserSpec =
                             (Add (Num 1) (Num 2))
                             (Num 3)
                         )
+            , test "negating expression" <|
+                \_ ->
+                    parseEquals "-(1 + 2)"
+                        (Mul
+                            (Num -1)
+                            (Add (Num 1) (Num 2))
+                        )
             ]
         , describe "ordering"
             [ test "add and sub" <|
@@ -193,6 +200,33 @@ parserSpec =
                                 (Div (Var X) (Var Y))
                             )
                         )
+            , test "parses negative variables" <|
+                \_ ->
+                    parseEquals
+                        "-x * -y"
+                        (Mul
+                            (Mul (Num -1) (Var X))
+                            (Mul (Num -1) (Var Y))
+                        )
+            ]
+        , describe "constants"
+            [ test "parses pi" <|
+                \_ ->
+                    parseEquals
+                        "2 * pi * x"
+                        (Mul
+                            (Mul
+                                (Num 2)
+                                (Num pi)
+                            )
+                            (Var X)
+                        )
+            , test "parses e" <|
+                \_ ->
+                    parseEquals "e ^ x" (Exp (Num e) (Var X))
+            , test "parses negative constants" <|
+                \_ ->
+                    parseEquals "-e ^ x" (Exp (Mul (Num -1) (Num e)) (Var X))
             ]
         , describe "math functions"
             [ test "parses sin" <|
@@ -251,6 +285,14 @@ parserSpec =
                                     )
                                 )
                             )
+                        )
+            , test "parses negative functions" <|
+                \_ ->
+                    parseEquals
+                        "-sin(30)"
+                        (Mul
+                            (Num -1)
+                            (Sin (Num 30))
                         )
             ]
         ]

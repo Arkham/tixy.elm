@@ -49,7 +49,7 @@ digits =
                 , float = Just identity
                 }
     in
-    Parser.map Num <|
+    map Num <|
         oneOf
             [ succeed negate
                 |. symbol "-"
@@ -60,26 +60,35 @@ digits =
 
 variable : Parser Expression
 variable =
-    Parser.succeed Var
+    succeed Var
         |= oneOf
-            [ Parser.succeed T |. keyword "t"
-            , Parser.succeed I |. keyword "i"
-            , Parser.succeed X |. keyword "x"
-            , Parser.succeed Y |. keyword "y"
+            [ succeed T |. keyword "t"
+            , succeed I |. keyword "i"
+            , succeed X |. keyword "x"
+            , succeed Y |. keyword "y"
+            ]
+
+
+constant : Parser Expression
+constant =
+    succeed Num
+        |= oneOf
+            [ succeed pi |. keyword "pi"
+            , succeed e |. keyword "e"
             ]
 
 
 mathFunctions : Parser (Expression -> Expression)
 mathFunctions =
     oneOf
-        [ Parser.succeed Sin |. keyword "sin"
-        , Parser.succeed Cos |. keyword "cos"
-        , Parser.succeed Tan |. keyword "tan"
-        , Parser.succeed Asin |. keyword "asin"
-        , Parser.succeed Acos |. keyword "acos"
-        , Parser.succeed Atan |. keyword "atan"
-        , Parser.succeed Abs |. keyword "abs"
-        , Parser.succeed Sqrt |. keyword "sqrt"
+        [ succeed Sin |. keyword "sin"
+        , succeed Cos |. keyword "cos"
+        , succeed Tan |. keyword "tan"
+        , succeed Asin |. keyword "asin"
+        , succeed Acos |. keyword "acos"
+        , succeed Atan |. keyword "atan"
+        , succeed Abs |. keyword "abs"
+        , succeed Sqrt |. keyword "sqrt"
         ]
 
 
@@ -88,20 +97,33 @@ a building block in larger expressions.
 -}
 term : Parser Expression
 term =
+    let
+        negatable parser_ =
+            backtrackable <|
+                oneOf
+                    [ succeed (Mul (Num -1))
+                        |. symbol "-"
+                        |= parser_
+                    , parser_
+                    ]
+    in
     oneOf
-        [ digits
-        , variable
-        , succeed identity
-            |. symbol "("
-            |. spaces
-            |= lazy (\_ -> expression)
-            |. spaces
-            |. symbol ")"
-        , succeed (\fn value -> fn value)
-            |. spaces
-            |= mathFunctions
-            |. spaces
-            |= lazy (\_ -> expression)
+        [ backtrackable digits -- digits already support negative numbers
+        , negatable variable
+        , negatable constant
+        , negatable <|
+            succeed identity
+                |. symbol "("
+                |. spaces
+                |= lazy (\_ -> expression)
+                |. spaces
+                |. symbol ")"
+        , negatable <|
+            succeed (\fn value -> fn value)
+                |. spaces
+                |= mathFunctions
+                |. spaces
+                |= lazy (\_ -> expression)
         ]
 
 
@@ -156,14 +178,14 @@ type Associativity
 operator : Parser Operator
 operator =
     oneOf
-        [ Parser.succeed AddOp |. symbol "+"
-        , Parser.succeed SubOp |. symbol "-"
-        , Parser.succeed MulOp |. symbol "*"
-        , Parser.succeed DivOp |. symbol "/"
-        , Parser.succeed ModOp |. symbol "%"
-        , Parser.succeed ExpOp |. symbol "^"
-        , Parser.succeed BitwiseAndOp |. symbol "&"
-        , Parser.succeed BitwiseOrOp |. symbol "|"
+        [ succeed AddOp |. symbol "+"
+        , succeed SubOp |. symbol "-"
+        , succeed MulOp |. symbol "*"
+        , succeed DivOp |. symbol "/"
+        , succeed ModOp |. symbol "%"
+        , succeed ExpOp |. symbol "^"
+        , succeed BitwiseAndOp |. symbol "&"
+        , succeed BitwiseOrOp |. symbol "|"
         ]
 
 
