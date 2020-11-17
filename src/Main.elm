@@ -87,6 +87,7 @@ type Msg
     | FocusInput
     | InputFocused
     | InputKeyDown Int
+    | ClickedLink Browser.UrlRequest
     | NoOp
 
 
@@ -164,6 +165,14 @@ update msg model =
         InputKeyDown _ ->
             ( model, Cmd.none )
 
+        ClickedLink request ->
+            case request of
+                Browser.Internal _ ->
+                    ( model, Cmd.none )
+
+                Browser.External url ->
+                    ( model, Navigation.load url )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -179,7 +188,7 @@ main =
                 }
         , update = update
         , subscriptions = \_ -> Events.onAnimationFrameDelta Tick
-        , onUrlRequest = \_ -> NoOp
+        , onUrlRequest = ClickedLink
         , onUrlChange = \_ -> NoOp
         }
 
@@ -210,7 +219,7 @@ inputId =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Html.h1 [] [ text "tixy.elm" ]
+        [ Html.h1 [] [ Html.a [ Attr.href "https://github.com/Arkham/tixy.elm" ] [ text "tixy.elm" ] ]
         , div [ class "map", Html.Events.onClick NextTutorial ]
             [ viewSvg model.expression model.time ]
         , div [ class "editor" ]

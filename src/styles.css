@@ -4,6 +4,10 @@ body {
   background-color: #111;
 }
 
+a, a:visited {
+  color: white;
+}
+
 .container {
   width: 320px;
   margin: 0 auto;
