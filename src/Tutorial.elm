@@ -92,6 +92,9 @@ otherTutorials =
     , { description = "bloop bloop bloop\nby @v21"
       , source = "(x-8)*(y-8) - sin(t)*64"
       }
+    , { description = "fireworks\nby @p_malin and @aemkei"
+      , source = "-0.4/(sqrt((x-t%10)^2+(y-t%8)^2)-(t%2)*9)"
+      }
     , { description = "ripples\nby @thespite"
       , source = "sin(t-sqrt(x*x+y*y))"
       }
