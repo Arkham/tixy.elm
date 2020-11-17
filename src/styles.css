@@ -15,25 +15,7 @@ h1 {
 }
 
 .map {
-  background: #111;
-  display: grid;
-  width: 320px;
-  height: 320px;
-  grid-template-rows: repeat(16, minmax(0, 1fr));
-  grid-template-columns: repeat(16, minmax(0, 1fr));
-}
-
-.field {
-  margin: 0;
-  padding: 0;
-  background-color: white;
-  display: block;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  margin: 1px 1px 0 0;
-  transform-origin: center center;
-  transform: scale(1);
+  user-select: none;
 }
 
 .editor {
