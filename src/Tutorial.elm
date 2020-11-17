@@ -17,7 +17,7 @@ all =
 firstTutorial : Tutorial
 firstTutorial =
     { description = "tixy - creative code golfing\nclick the dots for more info"
-    , source = "sin(y/8*t)"
+    , source = "sin(y/8+t)"
     }
 
 
