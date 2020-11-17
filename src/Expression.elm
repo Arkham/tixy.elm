@@ -366,9 +366,26 @@ evaluate ({ t, i, x, y } as tixy) expr =
             evaluate tixy first / evaluate tixy second
 
         Mod first second ->
-            toFloat <|
-                remainderBy (round <| evaluate tixy second)
-                    (round <| evaluate tixy first)
+            let
+                firstResult =
+                    evaluate tixy first
+
+                firstInt =
+                    if firstResult > 0 then
+                        floor firstResult
+
+                    else
+                        ceiling firstResult
+
+                gap =
+                    firstResult - toFloat firstInt
+
+                result =
+                    toFloat <|
+                        remainderBy (round <| evaluate tixy second)
+                            firstInt
+            in
+            result + gap
 
         Exp first second ->
             evaluate tixy first ^ evaluate tixy second

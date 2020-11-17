@@ -338,10 +338,18 @@ evaluateSpec =
                 \_ ->
                     Expression.evaluate tixy (Mod (Num 4) (Num 3))
                         |> Expect.equal 1
+            , test "float modulo" <|
+                \_ ->
+                    Expression.evaluate tixy (Mod (Num 4.5) (Num 3))
+                        |> expectFloat 1.5
             , test "negative modulo" <|
                 \_ ->
                     Expression.evaluate tixy (Mod (Num -4) (Num 3))
                         |> Expect.equal -1
+            , test "negative float modulo" <|
+                \_ ->
+                    Expression.evaluate tixy (Mod (Num -4.5) (Num 3))
+                        |> expectFloat -1.5
             , test "exponents" <|
                 \_ ->
                     Expression.evaluate tixy (Exp (Num 2) (Num 8))
@@ -361,43 +369,39 @@ evaluateSpec =
                     Expression.evaluate tixy (BitwiseOr (Num 3) (Num 5))
                         |> Expect.equal 7
             ]
-        , let
-            expectEqual v =
-                Expect.within (Expect.Absolute 0.0001) v
-          in
-          describe "math functions"
+        , describe "math functions"
             [ test "sin" <|
                 \_ ->
                     Expression.evaluate tixy (Sin (Num (degrees 30)))
-                        |> expectEqual 0.5
+                        |> expectFloat 0.5
             , test "cos" <|
                 \_ ->
                     Expression.evaluate tixy (Cos (Num (degrees 60)))
-                        |> expectEqual 0.5
+                        |> expectFloat 0.5
             , test "tan" <|
                 \_ ->
                     Expression.evaluate tixy (Tan (Num (degrees 45)))
-                        |> expectEqual 1
+                        |> expectFloat 1
             , test "asin" <|
                 \_ ->
                     Expression.evaluate tixy (Asin (Num 0.5))
-                        |> expectEqual (degrees 30)
+                        |> expectFloat (degrees 30)
             , test "acos" <|
                 \_ ->
                     Expression.evaluate tixy (Acos (Num 0.5))
-                        |> expectEqual (degrees 60)
+                        |> expectFloat (degrees 60)
             , test "atan" <|
                 \_ ->
                     Expression.evaluate tixy (Atan (Num 1))
-                        |> expectEqual (degrees 45)
+                        |> expectFloat (degrees 45)
             , test "abs" <|
                 \_ ->
                     Expression.evaluate tixy (Abs (Num -1))
-                        |> expectEqual 1
+                        |> expectFloat 1
             , test "sqrt" <|
                 \_ ->
                     Expression.evaluate tixy (Sqrt (Num 4))
-                        |> expectEqual 2
+                        |> expectFloat 2
             ]
         ]
 
@@ -411,3 +415,8 @@ parseEquals str value =
     str
         |> Parser.run Expression.parser
         |> Expect.equal (Ok value)
+
+
+expectFloat : Float -> Float -> Expect.Expectation
+expectFloat expected actual =
+    Expect.within (Expect.Absolute 0.0001) expected actual
