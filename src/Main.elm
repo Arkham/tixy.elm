@@ -3,10 +3,12 @@ module Main exposing (main)
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as Events
+import Browser.Navigation as Navigation
 import Expression exposing (Expression)
 import Html exposing (Html, button, div, text)
 import Html.Attributes as Attr exposing (attribute, class)
 import Html.Events
+import Json.Decode
 import List.Zipper as Zipper exposing (Zipper)
 import Parser
 import Task
@@ -20,11 +22,12 @@ type alias Model =
     , expression : Maybe Expression
     , help : String
     , tutorials : Zipper Tutorial
+    , key : Navigation.Key
     }
 
 
-initialModel : Model
-initialModel =
+init : Navigation.Key -> Model
+init key =
     let
         allTutorials =
             Tutorial.all
@@ -37,6 +40,7 @@ initialModel =
     , expression = parse source
     , help = description
     , tutorials = allTutorials
+    , key = key
     }
 
 
@@ -56,6 +60,8 @@ type Msg
     | NextTutorial
     | FocusInput
     | InputFocused
+    | InputKeyDown Int
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -118,14 +124,29 @@ update msg model =
         InputFocused ->
             ( { model | help = "hit ENTER to save the url\nand share it" }, Cmd.none )
 
+        InputKeyDown 13 ->
+            ( model, Navigation.replaceUrl model.key "?code=" )
+
+        InputKeyDown _ ->
+            ( model, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
+
 
 main : Program () Model Msg
 main =
-    Browser.element
-        { init = \_ -> ( initialModel, Cmd.none )
-        , view = view
+    Browser.application
+        { init = \flags url key -> ( init key, Cmd.none )
+        , view =
+            \model ->
+                { title = "tixy.elm"
+                , body = [ view model ]
+                }
         , update = update
         , subscriptions = \_ -> Events.onAnimationFrameDelta Tick
+        , onUrlRequest = \_ -> NoOp
+        , onUrlChange = \_ -> NoOp
         }
 
 
@@ -194,6 +215,7 @@ view model =
                 [ Attr.value model.input
                 , Attr.id inputId
                 , Html.Events.onInput ChangeInput
+                , onKeyDown InputKeyDown
                 , Attr.attribute "autocomplete" "off"
                 , Attr.attribute "autocapitalize" "off"
                 , Attr.attribute "spellcheck" "false"
@@ -214,3 +236,8 @@ viewHelp str =
                     div [ class "help-line" ] [ text ("// " ++ line) ]
                 )
         )
+
+
+onKeyDown : (Int -> msg) -> Html.Attribute msg
+onKeyDown tagger =
+    Html.Events.on "keydown" (Json.Decode.map tagger Html.Events.keyCode)
