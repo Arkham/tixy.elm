@@ -14,6 +14,10 @@ import Parser
 import Task
 import Time
 import Tutorial exposing (Tutorial)
+import Url exposing (Url)
+import Url.Builder
+import Url.Parser exposing ((<?>), top)
+import Url.Parser.Query as Query
 
 
 type alias Model =
@@ -26,18 +30,38 @@ type alias Model =
     }
 
 
-init : Navigation.Key -> Model
-init key =
+type Route
+    = Root (Maybe String)
+
+
+routeParser : Url.Parser.Parser (Route -> a) a
+routeParser =
+    Url.Parser.map Root (top <?> Query.string "code")
+
+
+init : Url -> Navigation.Key -> Model
+init url key =
     let
         allTutorials =
             Tutorial.all
 
         { description, source } =
             Zipper.current allTutorials
+
+        fromUrl =
+            case Url.Parser.parse routeParser url of
+                Just (Root (Just value)) ->
+                    Just value
+
+                _ ->
+                    Nothing
+
+        initialInput =
+            Maybe.withDefault source fromUrl
     in
     { time = 0
-    , input = source
-    , expression = parse source
+    , input = initialInput
+    , expression = parse initialInput
     , help = description
     , tutorials = allTutorials
     , key = key
@@ -122,10 +146,15 @@ update msg model =
             ( model, Task.attempt (\_ -> InputFocused) (Dom.focus inputId) )
 
         InputFocused ->
-            ( { model | help = "hit ENTER to save the url\nand share it" }, Cmd.none )
+            ( { model | help = "hit ENTER to update the url\nso you can share it" }, Cmd.none )
 
         InputKeyDown 13 ->
-            ( model, Navigation.replaceUrl model.key "?code=" )
+            let
+                url =
+                    Url.Builder.absolute []
+                        [ Url.Builder.string "code" model.input ]
+            in
+            ( model, Navigation.replaceUrl model.key url )
 
         InputKeyDown _ ->
             ( model, Cmd.none )
@@ -137,7 +166,7 @@ update msg model =
 main : Program () Model Msg
 main =
     Browser.application
-        { init = \flags url key -> ( init key, Cmd.none )
+        { init = \flags url key -> ( init url key, Cmd.none )
         , view =
             \model ->
                 { title = "tixy.elm"
@@ -215,6 +244,7 @@ view model =
                 [ Attr.value model.input
                 , Attr.id inputId
                 , Html.Events.onInput ChangeInput
+                , Html.Events.onClick InputFocused
                 , onKeyDown InputKeyDown
                 , Attr.attribute "autocomplete" "off"
                 , Attr.attribute "autocapitalize" "off"
