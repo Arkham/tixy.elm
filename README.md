@@ -6,7 +6,7 @@ An implementation of [tixy.land](https://tixy.land) in
 ## Credits
 
 - [@aemkei](https://twitter.com/aemkei) for the original tixy.land
-- christophp on the Elm Slack for the initial prototype
+- [@DeedoDev](https://twitter.com/DeedoDev) for the Elm prototype
 
 ## License
 
